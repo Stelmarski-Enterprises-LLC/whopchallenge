@@ -256,6 +256,29 @@ async function getPresignedUrl(fileExtension = "jpeg") {
   return data.data.presignedUpload;
 }
 
+async function uploadImageToS3(presignedUrl, imageBuffer) {
+  const response = await fetch(presignedUrl, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "image/jpeg",
+      Accept: "*/*",
+      Origin: "https://whop.com",
+      "Sec-Fetch-Site": "same-site",
+      "Sec-Fetch-Mode": "cors",
+      "Sec-Fetch-Dest": "empty",
+    },
+    body: imageBuffer,
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to upload image: ${response.status}`);
+  }
+
+  // Extract the final URL from the presigned URL
+  const uploadedUrl = presignedUrl.split("?")[0];
+  return uploadedUrl;
+}
+
 async function uploaLogoImage(
   imageBuffer,
   productRoute,
