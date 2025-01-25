@@ -76,18 +76,23 @@ async function downloadAndConvertImage(url) {
 async function prepareStoreAssets(tokenName) {
   const assets = await generateStoreAssets(tokenName);
 
-  const [logoBase64, bannerBase64, bannerImageBuffer] = await Promise.all([
-    downloadAndConvertImage(assets.logoUrl),
-    downloadAndConvertImage(assets.bannerUrl),
-    axios
-      .get(assets.bannerUrl, { responseType: "arraybuffer" })
-      .then((response) => response.data),
-  ]);
+  const [logoBase64, bannerBase64, logoImageBuffer, bannerImageBuffer] =
+    await Promise.all([
+      downloadAndConvertImage(assets.logoUrl),
+      downloadAndConvertImage(assets.bannerUrl),
+      axios
+        .get(assets.logoUrl, { responseType: "arraybuffer" })
+        .then((response) => response.data),
+      axios
+        .get(assets.bannerUrl, { responseType: "arraybuffer" })
+        .then((response) => response.data),
+    ]);
 
   return {
     ...assets,
     logoBase64,
     bannerBase64,
+    logoImageBuffer,
     bannerImageBuffer,
   };
 }
@@ -239,96 +244,16 @@ async function getPresignedUrl(fileExtension = "jpeg") {
         "x-whop-introspection": "1",
         "x-whop-traffic-source": "",
         cookie:
-          "whop_sig_id=e92e01b9-b728-4ca1-97b3-1fedd5dcddf5; __Host-authjs.csrf-token=a1ab994269750e136b102b355b63c29905aaa567fc52b8fdcd72d1187cc4685c%7Ce5cb81d9ffc5528d3ae7d854dd0ecf7f4fb7ee529df46639f32a87cc7bf07477; _gcl_au=1.1.734115784.1733332894; _ga=GA1.1.553353071.1733332894; _fbp=fb.1.1733332895110.634768154547759310; _tt_enable_cookie=1; _ttp=qRgufSI7eEJLFKGYoknK6OniNM4.tt.1; __stripe_mid=dc1b5742-6fcf-4e37-b71a-6726af0beb828aecf8; NEXT_LOCALE=en; __Secure-authjs.callback-url=https%3A%2F%2Fwhop.com%2Fviral-app-founders%2Fexp_uvJHqTZHedYkQS%2Fapp%2Fposts%2Fpost_1CJFwmQ6AgjHSGRxi3Qtw7%2F; ajs_user_id=user_JNaNG3fhSm8FP; ajs_anonymous_id=a6965878-e8a2-4a0b-9475-f0793e4fabd3; intercom-device-id-llm7ll78=b2955ce9-4d1d-4506-8550-cf2f4bdb5a1e; product-sidebar=true; whop-core.affiliate-dashboard-segment=customer; sessionSecureID=Z25dpVfmH3sgjCUoe8DdMHlOs9rr; ph_phc_AYScMQMhTs6oYVPfUq7hFfIyBTEMrjxs6nK6SiRjx0z_posthog=%7B%22distinct_id%22%3A%22user_hcuk9YBvSd4OV%22%7D; cf_clearance=qu204MzNJ0plIPwoNdM7XnlEHJ0YypI25T6nyuMbGvg-1736538633-1.2.1.1-eMnku1aKcwDuVFhK.rOfchQ8jWdypSHOfGm89znHFs_u1dkcSKUk6mp0zgaiNscSVBAhwFKgqp0kGfvis75edqL1oDmEZ28HeVwi6hq9rTk70B5lDR9MMk9jz0Pl8RrNQe03SyrFR3ZPW5L9MY7ARYyPww.mLCIScZ9gqRzQBBQ2gJW1zjpBmnMGC3hnictg7TjH9wNxJnl_e6EBRtCnOprTbXkIGWOV9dGY0lZgpEEX9br2dinKfK5F8ggLyzCXxNo8R0FuHiLqwN0rZ4beUOpSyNrZng2Zpx9C3Y6xr4kYuyM6PIljrT5V6h5H2ZZIWZSo1Wf9dUSt4.RzSNah.1A9rkLa_wumXIN8TRjVH1f1eFxj0zA5CXSG4.b0OXzmBgspru4Sn92ie5Y.PuJMew; ph_phc_wu7iKjxnL9ax9z497vFBbfnTfSAwfjmDZar6lDggVpO_posthog=%7B%22distinct_id%22%3A%22user_JNaNG3fhSm8FP%22%2C%22%24sesid%22%3A%5B1736538634988%2C%22019451c4-b5b1-7990-a9b6-d8c2aee362db%22%2C1736538633649%5D%2C%22%24epp%22%3Atrue%2C%22%24initial_person_info%22%3A%7B%22r%22%3A%22https%3A%2F%2Fwhop.com%2F%22%2C%22u%22%3A%22https%3A%2F%2Fcourses.apps.whop.com%2Fcustomer%2Fexperience%2Fexp_XZ4VL4qHGcx9p5%22%7D%7D; _clck=mygqbz%7C2%7Cfsv%7C0%7C1799; __Host-whop-core.csrf-token=16a35f57-165b-40b7-9cbb-b471c1435961; biz-id=biz_xpYFVNnIXn36wK%3Auser_JNaNG3fhSm8FP; __stripe_sid=af5681f2-d10a-4130-8dad-685796d23a25ec3065; __Secure-whop.suid=eyJhbGciOiJIUzI1NiJ9.eyJwcmV2aWV3IjpmYWxzZSwiaWF0IjoxNzM3Nzc0MDg3LCJpc3MiOiJ1cm46d2hvcGNvbTpnbG9iYWwtdWlkIiwic3ViIjoidXNlcl9KTmFORzNmaFNtOEZQIiwiZXhwIjoxNzM3Nzc0Njk3fQ.VlBlprnSMGDbizKPYqeWrIU_P9y29RscH-CgF2nUjY8; whop-core.d2c-pepe-frog-meme-new=1737774173; whop-core.d2c-testing-38-c73a=1737774173; whop-core.d2c-test2-e2=1737774173; whop-core.d2c-test2-e3=1737774173; whop-core.d2c-test1-e3=1737774173; whop-core.d2c-test2-df=1737774173; whop-core.d2c-pepe-frog-meme=1737774174; intercom-session-llm7ll78=V0ttTEE3TEpvZnYrek9HMHdpeHliV2VseTJXbVVZRFFDeXU0TTVRa2JvdHJtZVo4MlV2QXh3ZjJRTzBuenV0b1dnUDA3U2N5QXZjR1ExMlZXR3BCWTZJWWlpRERvem1pUnArcmhRakRlNGc9LS1aNkZZV1ZyUVdMbnFCTEVzQVdSWW5RPT0=--a17b250d4567c599355bd3d73b8483a451017fce; muxData=mux_viewer_id=90d1096b-c78c-48d2-90ae-1e7471580b25&msn=0.6808191336546248&sid=ea84b24f-5751-4c03-b24b-b3ac4bd86e52&sst=1737774261596&sex=1737775765288; whop-core.d2c-pookybypass=1737774648; whop-frosted-theme=appearance:dark; _ga_NGD3HKQGSV=GS1.1.1737770234.40.1.1737774650.58.0.0; whop-core.d2c-engineering-challenges=1737774650; __Secure-authjs.session-token=eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIn0..a_r9kNOL1xZ86DYE.OBxwOaRsMuUftUsJsT2YHhRrLKv9qQ_FgtAjauSrpAADNgWGJXFcG_ftHR_KflKb9tJedeuq0Ahzpqitnob44R379tFcCmQF-GsXfl5ZyTCd0ZS4LyxU9mNKFNl1BFRyJsluNnBJFp64p_KvRTVLFI2r87nMh5ZxGaNxrXTp21j1GC5Abj5_VlWQ7pRUaxFwyQmCJR_coIRzI07ORHdSaCMWLgO4WC6j0DAUOhHjKULPx3lGft-WBa4mPCVYBXIWx1fqecP0tNm7yQ_oINYpPumCio9ucvxkvEeO1SxAp8mSmGEq-8-tO7_ZtOLfEiq0SwgSgbi8SjS_mPmDC3Bs3xtsPAR9tth4yQllEKAFqcw5_9pk._Ma1hXvLBoubRk30WqGZhg; _rdt_uuid=1733332895058.06c8a1ff-0225-4a02-923a-127b41120d51; whop-core.d2c-unfiltered-whop-notes-from-steven=1737774650; _clsk=1szzlvc%7C1737774651058%7C19%7C0%7Cd.clarity.ms%2Fcollect; __cf_bm=5bWSL1FEwtCw.JTwOLzt.r50fGXFRcqedicbGyTJwy4-1737774650-1.0.1.1-xyyC0_nKVvp7_wt_DqZrLnX.dUhlfrbjT4AGA7oDMpaD1kv3b4gtNB1MkXZVlrJIOHbUwrYFC2oxdweK4V_wvQ",
-        Referer: "https://whop.com/pookybypass/",
+          "whop_sig_id=e92e01b9-b728-4ca1-97b3-1fedd5dcddf5; __Host-authjs.csrf-token=a1ab994269750e136b102b355b63c29905aaa567fc52b8fdcd72d1187cc4685c%7Ce5cb81d9ffc5528d3ae7d854dd0ecf7f4fb7ee529df46639f32a87cc7bf07477; _gcl_au=1.1.734115784.1733332894; _ga=GA1.1.553353071.1733332894; _fbp=fb.1.1733332895110.634768154547759310; _tt_enable_cookie=1; _ttp=qRgufSI7eEJLFKGYoknK6OniNM4.tt.1; __stripe_mid=dc1b5742-6fcf-4e37-b71a-6726af0beb828aecf8; NEXT_LOCALE=en; __Secure-authjs.callback-url=https%3A%2F%2Fwhop.com%2Fviral-app-founders%2Fexp_uvJHqTZHedYkQS%2Fapp%2Fposts%2Fpost_1CJFwmQ6AgjHSGRxi3Qtw7%2F; ajs_user_id=user_JNaNG3fhSm8FP; ajs_anonymous_id=a6965878-e8a2-4a0b-9475-f0793e4fabd3; intercom-device-id-llm7ll78=b2955ce9-4d1d-4506-8550-cf2f4bdb5a1e; product-sidebar=true; whop-core.affiliate-dashboard-segment=customer; sessionSecureID=Z25dpVfmH3sgjCUoe8DdMHlOs9rr; ph_phc_AYScMQMhTs6oYVPfUq7hFfIyBTEMrjxs6nK6SiRjx0z_posthog=%7B%22distinct_id%22%3A%22user_hcuk9YBvSd4OV%22%7D; cf_clearance=qu204MzNJ0plIPwoNdM7XnlEHJ0YypI25T6nyuMbGvg-1736538633-1.2.1.1-eMnku1aKcwDuVFhK.rOfchQ8jWdypSHOfGm89znHFs_u1dkcSKUk6mp0zgaiNscSVBAhwFKgqp0kGfvis75edqL1oDmEZ28HeVwi6hq9rTk70B5lDR9MMk9jz0Pl8RrNQe03SyrFR3ZPW5L9MY7ARYyPww.mLCIScZ9gqRzQBBQ2gJW1zjpBmnMGC3hnictg7TjH9wNxJnl_e6EBRtCnOprTbXkIGWOV9dGY0lZgpEEX9br2dinKfK5F8ggLyzCXxNo8R0FuHiLqwN0rZ4beUOpSyNrZng2Zpx9C3Y6xr4kYuyM6PIljrT5V6h5H2ZZIWZSo1Wf9dUSt4.RzSNah.1A9rkLa_wumXIN8TRjVH1f1eFxj0zA5CXSG4.b0OXzmBgspru4Sn92ie5Y.PuJMew; ph_phc_wu7iKjxnL9ax9z497vFBbfnTfSAwfjmDZar6lDggVpO_posthog=%7B%22distinct_id%22%3A%22user_JNaNG3fhSm8FP%22%2C%22%24sesid%22%3A%5B1736538634988%2C%22019451c4-b5b1-7990-a9b6-d8c2aee362db%22%2C1736538633649%5D%2C%22%24epp%22%3Atrue%2C%22%24initial_person_info%22%3A%7B%22r%22%3A%22https%3A%2F%2Fwhop.com%2F%22%2C%22u%22%3A%22https%3A%2F%2Fcourses.apps.whop.com%2Fcustomer%2Fexperience%2Fexp_XZ4VL4qHGcx9p5%22%7D%7D; _clck=mygqbz%7C2%7Cfsv%7C0%7C1799; __Host-whop-core.csrf-token=16a35f57-165b-40b7-9cbb-b471c1435961; biz-id=biz_xpYFVNnIXn36wK%3Auser_JNaNG3fhSm8FP; __stripe_sid=af5681f2-d10a-4130-8dad-685796d23a25ec3065; __Secure-whop.suid=eyJhbGciOiJIUzI1NiJ9.eyJwcmV2aWV3IjpmYWxzZSwiaWF0IjoxNzM3Nzc0MDg3LCJpc3MiOiJ1cm46d2hvcGNvbTpnbG9iYWwtdWlkIiwic3ViIjoidXNlcl9KTmFORzNmaFNtOEZQIiwiZXhwIjoxNzM3Nzc0Njk3fQ.VlBlprnSMGDbizKPYqeWrIU_P9y29RscH-CgF2nUjY8; whop-core.d2c-pepe-frog-meme-new=1737774173; whop-core.d2c-testing-38-c73a=1737774173; whop-core.d2c-test2-e2=1737774173; whop-core.d2c-test2-e3=1737774173; whop-core.d2c-test1-e3=1737774173; whop-core.d2c-test2-df=1737774173; whop-core.d2c-pepe-frog-meme=1737774174; intercom-session-llm7ll78=V0ttTEE3TEpvZnYrek9HMHdpeHliV2VseTJXbVVZRFFDeXU0TTVRa2JvdHJtZVo4MlV2QXh3ZjJRTzBuenV0b1dnUDA3U2N5QXZjR1ExMlZXR3BCWTZJWWlpRERvem1pUnArcmhRakRlNGc9LS1aNkZZV1ZyUVdMbnFCTEVzQVdSWW5RPT0=--a17b250d4567c599355bd3d73b8483a451017fce; muxData=mux_viewer_id=90d1096b-c78c-48d2-90ae-1e7471580b25&msn=0.6808191336546248&sid=ea84b24f-5751-4c03-b24b-b3ac4bd86e52&sst=1737774261596&sex=1737775765288; whop-frosted-theme=appearance:dark; _rdt_uuid=1733332895058.06c8a1ff-0225-4a02-923a-127b41120d51; _ga_NGD3HKQGSV=GS1.1.1737770234.40.1.1737776517.41.0.0; _clsk=1szzlvc%7C1737776518133%7C73%7C0%7Cd.clarity.ms%2Fcollect; whop-core.d2c-tokenization-cf=1737776518; whop-core.d2c-unfiltered-whop-notes-from-steven=1737776518; whop-core.d2c-engineering-challenges=1737776518; __Secure-authjs.session-token=eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIn0..kN7ZTBOKimSApTlL.E8iTl1YpzJtpNxXzVciWMfUAooqM65FYVJhKagDlKq0tlWTG1bC0YpE-FaZQW1JIcNv7NbR9ip750uz_fUYB8T5ZAH3zP-gk-a7Nsqa-Af2rYI7Lsbbi3ijBrKdScRW4W4F9mxuD9YkR3M-kFlPrqCx6LjUg3WKmYVzRn-hXd2647R0KhJMUGE4Y9JhQ1AAtZYIF_ymYYaZV6rblXTucLXHG8ApngB-f8CiFyn1LM2nOlNPR5TTe0A-qdArgy9PRgJ-LYe5IupJftNoSdQLnaM6QEBSivnNV2ef67tjCaIGJ7PStd4szAudRza-5XZbVsV6Gh_9QOpBNWdsLSqmyxeiiYSsErNQ8XTZcNizaBPN3uo89.OYL-zlhdiDG3q-ZX6nVR8Q; __cf_bm=GHyFt_WV0xXY5cbzAPDE_As_qzRg8YCn0DNmFHzTGhE-1737776534-1.0.1.1-aNGvZFmkX_XejBTfAJf7fhCjWq0qvtmLOFt_pDfGNTrHU3ZUg4gJncfBKqh0pMoa5yJ8L_2.2R6f56oFqQM.Xg",
+        Referer: "https://whop.com/tokenization-cf/",
         "Referrer-Policy": "strict-origin-when-cross-origin",
       },
-      body: '{"query":"\\n    mutation fetchPresignedUploadUrl($input: PresignedUploadInput!) {\\n  presignedUpload(input: $input)\\n}\\n    ","variables":{"input":{"fileExtV2":"jpeg","isPublic":true}},"operationName":"fetchPresignedUploadUrl"}',
+      body: `[{"companyId":"${companyId}","pass":{"id":"${accessPassId}","title":"tokenization","headline":"test","shortenedDescription":"$undefined","creatorPitch":"$undefined","visibility":"visible","globalAffiliateStatus":"$undefined","globalAffiliatePercentage":"$undefined","redirectPurchaseUrl":"","customCta":"join","customCtaUrl":"","image":"${imageUrl}"},"images":"$undefined","affiliateAssets":"$undefined","productRoute":"${productRoute}","category":"$undefined","subcategory":"$undefined","pathname":"/${productRoute}/","upsells":"$undefined","popupPromo":{"enabled":false,"discountPercentage":"$undefined"}}]`,
       method: "POST",
     }
   );
 
-  if (!response.ok) {
-    throw new Error(`Failed to get presigned URL: ${response.status}`);
-  }
-
-  const data = await response.json();
-  return data.data.presignedUpload;
-}
-
-async function uploadImageToS3(presignedUrl, imageBuffer) {
-  const response = await fetch(presignedUrl, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "image/jpeg",
-      Accept: "*/*",
-      Origin: "https://whop.com",
-      "Sec-Fetch-Site": "same-site",
-      "Sec-Fetch-Mode": "cors",
-      "Sec-Fetch-Dest": "empty",
-    },
-    body: imageBuffer,
-  });
-
-  if (!response.ok) {
-    throw new Error(`Failed to upload image: ${response.status}`);
-  }
-
-  // Extract the final URL from the presigned URL
-  const uploadedUrl = presignedUrl.split("?")[0];
-  return uploadedUrl;
-}
-
-async function updateWhopWithImage(
-  productRoute,
-  companyId,
-  accessPassId,
-  imageUrl
-) {
-  let data = `[{"companyId":"${companyId}","pass":{"id":"${accessPassId}","title":"$undefined","headline":"$undefined","shortenedDescription":"$undefined","creatorPitch":"$undefined","visibility":"$undefined","globalAffiliateStatus":"$undefined","globalAffiliatePercentage":"$undefined","redirectPurchaseUrl":"$undefined","route":"$undefined"},"images":["${imageUrl}"],"affiliateAssets":"$undefined","productRoute":"${productRoute}","category":"$undefined","subcategory":"$undefined","pathname":"/${productRoute}/","upsells":"$undefined","popupPromo":{"enabled":false,"discountPercentage":"$undefined"}}]`;
-
-  let config = {
-    method: "post",
-    maxBodyLength: Infinity,
-    url: `https://whop.com/${productRoute}/`,
-    headers: {
-      Host: "whop.com",
-      Connection: "keep-alive",
-      "sec-ch-ua-platform": '"macOS"',
-      "sec-ch-ua": '"Not A(Brand";v="8", "Chromium";v="132"',
-      "sec-ch-ua-mobile": "?0",
-      accept: "text/x-component",
-      tracestate:
-        "4200517@nr=0-1-4200517-1120347029-05231f6714b34668----1737770918972",
-      "next-action": "e05ea7d4b495bee9e51357af2bbd573314ef1b8f",
-      newrelic:
-        "eyJ2IjpbMCwxXSwiZCI6eyJ0eSI6IkJyb3dzZXIiLCJhYyI6IjQyMDA1MTciLCJhcCI6IjExMjAzNDcwMjkiLCJpZCI6IjA1MjMxZjY3MTRiMzQ2NjgiLCJ0ciI6IjVhMWYyODkyNDZjNzRiZWVjZjU5ZDY3YWUwNDkyNGQyIiwidGkiOjE3Mzc3NzA5MTg5NzJ9fQ==",
-      "next-url": "/en/true/false",
-      "User-Agent":
-        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36",
-      DNT: "1",
-      "x-deployment-id": "dpl_8FjNEMeTWP7yPV7Ta7FjLa4Z7BMb",
-      Origin: "https://whop.com",
-      "Sec-Fetch-Site": "same-origin",
-      "Sec-Fetch-Mode": "cors",
-      "Sec-Fetch-Dest": "empty",
-      Referer: "https://whop.com/new/",
-      "Accept-Language": "en-US,en;q=0.9",
-      "Content-Type": "text/plain;charset=UTF-8",
-      Cookie:
-        "whop_sig_id=e92e01b9-b728-4ca1-97b3-1fedd5dcddf5; __Host-authjs.csrf-token=a1ab994269750e136b102b355b63c29905aaa567fc52b8fdcd72d1187cc4685c%7Ce5cb81d9ffc5528d3ae7d854dd0ecf7f4fb7ee529df46639f32a87cc7bf07477; _gcl_au=1.1.734115784.1733332894; _ga=GA1.1.553353071.1733332894; _fbp=fb.1.1733332895110.634768154547759310; _tt_enable_cookie=1; _ttp=qRgufSI7eEJLFKGYoknK6OniNM4.tt.1; __stripe_mid=dc1b5742-6fcf-4e37-b71a-6726af0beb828aecf8; NEXT_LOCALE=en; __Secure-authjs.callback-url=https%3A%2F%2Fwhop.com%2Fviral-app-founders%2Fexp_uvJHqTZHedYkQS%2Fapp%2Fposts%2Fpost_1CJFwmQ6AgjHSGRxi3Qtw7%2F; ajs_user_id=user_JNaNG3fhSm8FP; ajs_anonymous_id=a6965878-e8a2-4a0b-9475-f0793e4fabd3; intercom-device-id-llm7ll78=b2955ce9-4d1d-4506-8550-cf2f4bdb5a1e; product-sidebar=true; whop-core.affiliate-dashboard-segment=customer; sessionSecureID=Z25dpVfmH3sgjCUoe8DdMHlOs9rr; ph_phc_AYScMQMhTs6oYVPfUq7hFfIyBTEMrjxs6nK6SiRjx0z_posthog=%7B%22distinct_id%22%3A%22user_hcuk9YBvSd4OV%22%7D; cf_clearance=qu204MzNJ0plIPwoNdM7XnlEHJ0YypI25T6nyuMbGvg-1736538633-1.2.1.1-eMnku1aKcwDuVFhK.rOfchQ8jWdypSHOfGm89znHFs_u1dkcSKUk6mp0zgaiNscSVBAhwFKgqp0kGfvis75edqL1oDmEZ28HeVwi6hq9rTk70B5lDR9MMk9jz0Pl8RrNQe03SyrFR3ZPW5L9MY7ARYyPww.mLCIScZ9gqRzQBBQ2gJW1zjpBmnMGC3hnictg7TjH9wNxJnl_e6EBRtCnOprTbXkIGWOV9dGY0lZgpEEX9br2dinKfK5F8ggLyzCXxNo8R0FuHiLqwN0rZ4beUOpSyNrZng2Zpx9C3Y6xr4kYuyM6PIljrT5V6h5H2ZZIWZSo1Wf9dUSt4.RzSNah.1A9rkLa_wumXIN8TRjVH1f1eFxj0zA5CXSG4.b0OXzmBgspru4Sn92ie5Y.PuJMew; ph_phc_wu7iKjxnL9ax9z497vFBbfnTfSAwfjmDZar6lDggVpO_posthog=%7B%22distinct_id%22%3A%22user_JNaNG3fhSm8FP%22%2C%22%24sesid%22%3A%5B1736538634988%2C%22019451c4-b5b1-7990-a9b6-d8c2aee362db%22%2C1736538633649%5D%2C%22%24epp%22%3Atrue%2C%22%24initial_person_info%22%3A%7B%22r%22%3A%22https%3A%2F%2Fwhop.com%2F%22%2C%22u%22%3A%22https%3A%2F%2Fcourses.apps.whop.com%2Fcustomer%2Fexperience%2Fexp_XZ4VL4qHGcx9p5%22%7D%7D; _clck=mygqbz%7C2%7Cfsv%7C0%7C1799; __Host-whop-core.csrf-token=16a35f57-165b-40b7-9cbb-b471c1435961; biz-id=biz_xpYFVNnIXn36wK%3Auser_JNaNG3fhSm8FP; __stripe_sid=af5681f2-d10a-4130-8dad-685796d23a25ec3065; __Secure-whop.suid=eyJhbGciOiJIUzI1NiJ9.eyJwcmV2aWV3IjpmYWxzZSwiaWF0IjoxNzM3NzcwNTg5LCJpc3MiOiJ1cm46d2hvcGNvbTpnbG9iYWwtdWlkIiwic3ViIjoidXNlcl9KTmFORzNmaFNtOEZQIiwiZXhwIjoxNzM3NzcxMTk5fQ.ItzWapbk9S3hA76g7QDbrgXJJ_KJOalC1DXL5Iow72Q; muxData=mux_viewer_id=90d1096b-c78c-48d2-90ae-1e7471580b25&msn=0.6808191336546248&sid=49577c38-58ee-4a7f-8003-edb493e3e5d8&sst=1737770590305&sex=1737772090460; whop-core.d2c-cultured=1737770592; whop-core.d2c-whop-investors=1737770592; whop-core.d2c-steven=1737770592; whop-frosted-theme=appearance:dark; whop-core.d2c-engineering-challenges=1737770907; whop-core.d2c-testing-38-c73a=1737770907; whop-core.d2c-unfiltered-whop-notes-from-steven=1737770907; __Secure-authjs.session-token=eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIn0..ZBIdyeknVwo4TBZ0.nvofwFKOO5I3xRIhpcSdjv7smxCj6g6ouQz9euoXY27ivfOoKO7gqpmliPsgbGrqP-AlKyhArXJTe2jPTJZWjzIErO5twolrOiTl1Vd_H6ymm9OnaGa_gVzTTMSiDdiyoSmqG4AU2xEfCa9aeUA6nhQ6OcqbYHozQDzuGjf0yPjfhYT-lhdWma__H3tmk974H9tgFmJasYzMYNJvqtfe7Nda2aFGaZgzZPMB9XAR8n7Y5wXWnCwXjO7QFO3vzTt9GTKH3zmQC0o5p6R7v9UL8_KzZAx5qOE31TR9JclkaOmwr5kY9HSOrsBEZVl-T7tBZ4NIOqaDowp0x1nKKcksWXWOTh5PlQyOh9DL59v48rPeNHb3.D037Ue8OP7REjHS7KfD5og; __cf_bm=G6GOgL2hDVdNwJShVRyKX3Nzjb6tY64.0_gYU4fx1lc-1737770907-1.0.1.1-OdvdCn03IB4DISliF7c63iHu2b7L5FtzKQej1rwZbWTZQCBs69a71_2saP1SZQaS3qXlHDVUwFRk0kpjTC5XxA; whop-core.d2c-test1-e3=1737770909; _rdt_uuid=1733332895058.06c8a1ff-0225-4a02-923a-127b41120d51; _clsk=5ezx2x%7C1737770910341%7C32%7C0%7Co.clarity.ms%2Fcollect; _ga_NGD3HKQGSV=GS1.1.1737770234.40.1.1737770910.56.0.0; NEXT_LOCALE=en; __Host-whop-core.csrf-token=91de8291-cd50-48a8-8eff-6f89789f21f5;",
-    },
-    data: data,
-  };
-
-  axios
-    .request(config)
-    .then((response) => {
-      console.log("image upload status", response.status);
-    })
-    .catch((error) => {
-      console.log(error);
-    });
+  console.log("logo upload status", response.status);
 }
 
 async function uploadBannerImage(
@@ -368,6 +293,10 @@ async function createEnhancedWhop(tokenName) {
     const { id, route } = await createWhopStore(companyId, tokenName);
 
     // Upload banner image if available
+    if (assets.logoImageBuffer) {
+      await uploadLogoImage(assets.logoImageBuffer, route, companyId, id);
+    }
+
     if (assets.bannerImageBuffer) {
       await uploadBannerImage(assets.bannerImageBuffer, route, companyId, id);
     } else {
@@ -431,7 +360,11 @@ async function replyToTweet(tweetId, productRoute) {
     method: "POST",
   });
 }
-let processedTweetIds = ["1882969151230386272", "1882970220945703310"];
+let processedTweetIds = [
+  "1882969151230386272",
+  "1882970220945703310",
+  "1882996477053809037",
+];
 
 async function fetchNotifications() {
   const response = await fetch(
@@ -492,8 +425,7 @@ async function fetchNotifications() {
           );
 
           if (match) {
-            var tokenName = match[1];
-            tokenName = "tokenization";
+            const tokenName = match[1];
             console.log(`Found token name: $${tokenName}`);
             processedTweetIds.push(tweetId); // Add tweet ID to processed list
             // You can now proceed to create a Whop store for this token
