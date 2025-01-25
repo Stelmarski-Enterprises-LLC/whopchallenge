@@ -256,6 +256,75 @@ async function getPresignedUrl(fileExtension = "jpeg") {
   console.log("logo upload status", response.status);
 }
 
+async function uploaLogoImage(
+  imageBuffer,
+  productRoute,
+  companyId,
+  accessPassId
+) {
+  try {
+    // Step 1: Get presigned URL
+    const presignedUrl = await getPresignedUrl("jpeg");
+    console.log("Presigned URL:", presignedUrl);
+
+    // Step 2: Upload image to S3
+    const imageUrl = await uploadImageToS3(presignedUrl, imageBuffer);
+    console.log("Uploaded Image URL:", imageUrl);
+
+    // Step 3: Update Whop with the new image
+    return await uploadWhopLogoImage(
+      productRoute,
+      companyId,
+      accessPassId,
+      imageUrl
+    );
+  } catch (error) {
+    console.error("Error uploading logo image:", error);
+    throw error;
+  }
+}
+
+async function uploadWhopLogoImage(
+  productRoute,
+  companyId,
+  accessPassId,
+  imageUrl
+) {
+  const response = await fetch("https://whop.com/tokenization-cf/", {
+    headers: {
+      accept: "text/x-component",
+      "accept-language": "en-US,en;q=0.9",
+      baggage:
+        "sentry-environment=vercel-production,sentry-release=114ce94bff2e4ca0274a74a7a94a94c60f71db1a,sentry-public_key=a0eeb19ab96e2033121600d07dfe6a12,sentry-trace_id=a0be055d20eb4eb0a0ca1febfa4510d1,sentry-sample_rate=0,sentry-sampled=false",
+      "content-type": "text/plain;charset=UTF-8",
+      newrelic:
+        "eyJ2IjpbMCwxXSwiZCI6eyJ0eSI6IkJyb3dzZXIiLCJhYyI6IjQyMDA1MTciLCJhcCI6IjExMjAzNDcwMjkiLCJpZCI6ImM5MmI3OTI4ODdhMzk5NzgiLCJ0ciI6ImZkMGRiZWUxZWY3ODNkMjNhOTQ2Y2JiMDQ2NGNhMDE1IiwidGkiOjE3Mzc3NzcyNjk3MjZ9fQ==",
+      "next-action": "0d2386c25adce7fa1d2610040374916127470e0d",
+      "next-router-state-tree":
+        "%5B%22%22%2C%7B%22children%22%3A%5B%5B%22locale%22%2C%22en%22%2C%22d%22%5D%2C%7B%22children%22%3A%5B%5B%22authenticated%22%2C%22true%22%2C%22d%22%5D%2C%7B%22children%22%3A%5B%5B%22embedded%22%2C%22false%22%2C%22d%22%5D%2C%7B%22children%22%3A%5B%22(desktop)%22%2C%7B%22children%22%3A%5B%22(store)%22%2C%7B%22children%22%3A%5B%5B%22productRoute%22%2C%22tokenization-cf%22%2C%22d%22%5D%2C%7B%22children%22%3A%5B%5B%22planId%22%2C%22-%22%2C%22d%22%5D%2C%7B%22children%22%3A%5B%22(with-layout)%22%2C%7B%22children%22%3A%5B%22__PAGE__%22%2C%7B%7D%2C%22%2Ftokenization-cf%2F%22%2C%22refresh%22%5D%7D%2Cnull%2Cnull%2Ctrue%5D%7D%5D%7D%5D%7D%2Cnull%2Cnull%5D%7D%2Cnull%2Cnull%5D%2C%22modal%22%3A%5B%22__DEFAULT__%22%2C%7B%7D%5D%7D%2Cnull%2Cnull%5D%7D%2Cnull%2Cnull%5D%7D%2Cnull%2Cnull%5D%7D%2Cnull%2Cnull%2Ctrue%5D",
+      "sec-ch-ua": '"Not A(Brand";v="8", "Chromium";v="132"',
+      "sec-ch-ua-mobile": "?0",
+      "sec-ch-ua-platform": '"macOS"',
+      "sec-fetch-dest": "empty",
+      "sec-fetch-mode": "cors",
+      "sec-fetch-site": "same-origin",
+      "sentry-trace": "a0be055d20eb4eb0a0ca1febfa4510d1-a1c87c1150539e67-0",
+      traceparent: "00-fd0dbee1ef783d23a946cbb0464ca015-c92b792887a39978-01",
+      tracestate:
+        "4200517@nr=0-1-4200517-1120347029-c92b792887a39978----1737777269726",
+      "x-deployment-id": "dpl_EwLWMxzZVg8Yuq726Pbv6xHEiqLo",
+      cookie:
+        "whop_sig_id=e92e01b9-b728-4ca1-97b3-1fedd5dcddf5; __Host-authjs.csrf-token=a1ab994269750e136b102b355b63c29905aaa567fc52b8fdcd72d1187cc4685c%7Ce5cb81d9ffc5528d3ae7d854dd0ecf7f4fb7ee529df46639f32a87cc7bf07477; _gcl_au=1.1.734115784.1733332894; _ga=GA1.1.553353071.1733332894; _fbp=fb.1.1733332895110.634768154547759310; _tt_enable_cookie=1; _ttp=qRgufSI7eEJLFKGYoknK6OniNM4.tt.1; __stripe_mid=dc1b5742-6fcf-4e37-b71a-6726af0beb828aecf8; NEXT_LOCALE=en; __Secure-authjs.callback-url=https%3A%2F%2Fwhop.com%2Fviral-app-founders%2Fexp_uvJHqTZHedYkQS%2Fapp%2Fposts%2Fpost_1CJFwmQ6AgjHSGRxi3Qtw7%2F; ajs_user_id=user_JNaNG3fhSm8FP; ajs_anonymous_id=a6965878-e8a2-4a0b-9475-f0793e4fabd3; intercom-device-id-llm7ll78=b2955ce9-4d1d-4506-8550-cf2f4bdb5a1e; product-sidebar=true; whop-core.affiliate-dashboard-segment=customer; sessionSecureID=Z25dpVfmH3sgjCUoe8DdMHlOs9rr; ph_phc_AYScMQMhTs6oYVPfUq7hFfIyBTEMrjxs6nK6SiRjx0z_posthog=%7B%22distinct_id%22%3A%22user_hcuk9YBvSd4OV%22%7D; cf_clearance=qu204MzNJ0plIPwoNdM7XnlEHJ0YypI25T6nyuMbGvg-1736538633-1.2.1.1-eMnku1aKcwDuVFhK.rOfchQ8jWdypSHOfGm89znHFs_u1dkcSKUk6mp0zgaiNscSVBAhwFKgqp0kGfvis75edqL1oDmEZ28HeVwi6hq9rTk70B5lDR9MMk9jz0Pl8RrNQe03SyrFR3ZPW5L9MY7ARYyPww.mLCIScZ9gqRzQBBQ2gJW1zjpBmnMGC3hnictg7TjH9wNxJnl_e6EBRtCnOprTbXkIGWOV9dGY0lZgpEEX9br2dinKfK5F8ggLyzCXxNo8R0FuHiLqwN0rZ4beUOpSyNrZng2Zpx9C3Y6xr4kYuyM6PIljrT5V6h5H2ZZIWZSo1Wf9dUSt4.RzSNah.1A9rkLa_wumXIN8TRjVH1f1eFxj0zA5CXSG4.b0OXzmBgspru4Sn92ie5Y.PuJMew; ph_phc_wu7iKjxnL9ax9z497vFBbfnTfSAwfjmDZar6lDggVpO_posthog=%7B%22distinct_id%22%3A%22user_JNaNG3fhSm8FP%22%2C%22%24sesid%22%3A%5B1736538634988%2C%22019451c4-b5b1-7990-a9b6-d8c2aee362db%22%2C1736538633649%5D%2C%22%24epp%22%3Atrue%2C%22%24initial_person_info%22%3A%7B%22r%22%3A%22https%3A%2F%2Fwhop.com%2F%22%2C%22u%22%3A%22https%3A%2F%2Fcourses.apps.whop.com%2Fcustomer%2Fexperience%2Fexp_XZ4VL4qHGcx9p5%22%7D%7D; _clck=mygqbz%7C2%7Cfsv%7C0%7C1799; __Host-whop-core.csrf-token=16a35f57-165b-40b7-9cbb-b471c1435961; biz-id=biz_xpYFVNnIXn36wK%3Auser_JNaNG3fhSm8FP; __stripe_sid=af5681f2-d10a-4130-8dad-685796d23a25ec3065; whop-frosted-theme=appearance:dark; intercom-session-llm7ll78=R0YrTHcySGRSQ0EzTWhYSUNqV1pmUzFRekxVdXRMMGMxWnJiOGxtSnhkN0dQU0h6dlVCRGZmTTlQZkliYVF2elduVlpFQm4xZWxveUM3R09qNEg1U3E5N0lBdkRPODdIb0dHZU9TK3RvVDA9LS1GMTlPclpyOGJHUzlVNW1WOWlRYUdnPT0=--27d2fbe82e65307d8d58307dffba6e65ea81e088; __Secure-whop.suid=eyJhbGciOiJIUzI1NiJ9.eyJwcmV2aWV3IjpmYWxzZSwiaWF0IjoxNzM3Nzc2OTk2LCJpc3MiOiJ1cm46d2hvcGNvbTpnbG9iYWwtdWlkIiwic3ViIjoidXNlcl9KTmFORzNmaFNtOEZQIiwiZXhwIjoxNzM3Nzc3NjA2fQ.zOqv4eEl4p-PSrQ_4i5nsC9_LoXhOVT13SQ9860Rw6A; muxData=mux_viewer_id=90d1096b-c78c-48d2-90ae-1e7471580b25&msn=0.6808191336546248&sid=ea84b24f-5751-4c03-b24b-b3ac4bd86e52&sst=1737774261596&sex=1737778498920; __Secure-authjs.session-token=eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIn0..ChXP07O8boCT5ryr.0HSLB5J5Wr9xVaEzejjGnjTffcd1KdaYOtXIfgabh_l2CSveLIpsMB2ZLT03OVgW0Je6JheDqt5jZgr3MC4NBfO1HT2KlSBA1aHEWvOi_5bvdPAA0RoeTx3csYaX3T6ixnbTUGzuYZED-NC6UJDNEy2zERyWBpkHWBlsgFmvZmzSFnuI64ZO0Lpwe14hqTcWLwIUOapQ5Ya4cpyxZWteWcDalU2iC5An0ipg-oxjofZaQoTMOo0E-W-7ulZ8fes5cgc6PASZeTupugduDvFnkUfuuOEz-53UmG1cvLq4lBoxUgwaaQpoM8nqYfcpeHQO6e8ddm07ON45Ix4yeenaDlt2SGdVBlU4ChM4LUjJIDx1_kgK.xkhQK3b8HgH0KokBHOFdYQ; whop-core.d2c-tokenization-59=1737777251; whop-core.d2c-tokenization-34=1737777251; whop-core.d2c-testing-38-c73a=1737777251; whop-core.d2c-tokenization-30=1737777251; whop-core.d2c-tokenization-6a=1737777251; whop-core.d2c-test1-e3=1737777251; whop-core.d2c-test2-e3=1737777251; whop-core.d2c-test2-df=1737777251; whop-core.d2c-test2-e2=1737777251; whop-core.d2c-tokenization-cf=1737777252; _rdt_uuid=1733332895058.06c8a1ff-0225-4a02-923a-127b41120d51; _clsk=1szzlvc%7C1737777252604%7C83%7C0%7Cd.clarity.ms%2Fcollect; _ga_NGD3HKQGSV=GS1.1.1737770234.40.1.1737777253.56.0.0; __cf_bm=6vnRS_wqdCSUBDWOPg7OP59gfU.mXlP0QYrQVo65qbo-1737777269-1.0.1.1-kba.VGESriLoop_rtk0XQNV1BPxC_V.FvMRnRmMu154kF7LrwU.MMJf8WdnHYsC.J6wKQsWKmh5CGmJpqAlwGA",
+      Referer: "https://whop.com/tokenization-cf/",
+      "Referrer-Policy": "strict-origin-when-cross-origin",
+    },
+    body: `[{"companyId":"${companyId}","pass":{"id":"${accessPassId}","title":"${tokenName}","headline":"Tokenization WHOP","shortenedDescription":"$undefined","creatorPitch":"$undefined","visibility":"visible","globalAffiliateStatus":"$undefined","globalAffiliatePercentage":"$undefined","redirectPurchaseUrl":"","customCta":"join","customCtaUrl":"","image":"${imageUrl}"},"images":"$undefined","affiliateAssets":"$undefined","productRoute":"${productRoute}","category":"$undefined","subcategory":"$undefined","pathname":"/${productRoute}/","upsells":"$undefined","popupPromo":{"enabled":false,"discountPercentage":"$undefined"}}]`,
+    method: "POST",
+  });
+
+  console.log("logo upload status", response.status);
+}
+
 async function uploadBannerImage(
   imageBuffer,
   productRoute,
@@ -294,7 +363,7 @@ async function createEnhancedWhop(tokenName) {
 
     // Upload banner image if available
     if (assets.logoImageBuffer) {
-      await uploadLogoImage(assets.logoImageBuffer, route, companyId, id);
+      await uploaLogoImage(assets.logoImageBuffer, route, companyId, id);
     }
 
     if (assets.bannerImageBuffer) {
@@ -364,6 +433,7 @@ let processedTweetIds = [
   "1882969151230386272",
   "1882970220945703310",
   "1882996477053809037",
+  "1882999543354331140",
 ];
 
 async function fetchNotifications() {
