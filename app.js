@@ -340,11 +340,11 @@ async function uploadBannerImage(
   try {
     // Step 1: Get presigned URL
     const presignedUrl = await getPresignedUrl("jpeg");
-    console.log(presignedUrl);
+    console.log("Presigned URL:", presignedUrl);
 
     // Step 2: Upload image to S3
     const imageUrl = await uploadImageToS3(presignedUrl, imageBuffer);
-    console.log(imageUrl);
+    console.log("Uploaded Image URL:", imageUrl);
 
     // Step 3: Update Whop with the new image
     return await updateWhopWithImage(
@@ -376,6 +376,7 @@ async function createEnhancedWhop(tokenName) {
 
     // Add chat app to the store
     await createChatApp(route, companyId, id);
+    return route;
   } catch (error) {
     console.error("Error creating enhanced whop:", error);
     throw error;
@@ -400,7 +401,37 @@ function parseTweetInstructions(tweetText) {
   }
 }
 
-let processedTweetIds = [];
+async function replyToTweet(tweetId, productRoute) {
+  fetch("https://x.com/i/api/graphql/_aUkOlYcrHMY3LR-lUVuSg/CreateTweet", {
+    headers: {
+      accept: "*/*",
+      "accept-language": "en-US,en;q=0.9",
+      authorization: process.env.TWITTER_KEY,
+      "content-type": "application/json",
+      "sec-ch-ua": '"Not A(Brand";v="8", "Chromium";v="132"',
+      "sec-ch-ua-mobile": "?0",
+      "sec-ch-ua-platform": '"macOS"',
+      "sec-fetch-dest": "empty",
+      "sec-fetch-mode": "cors",
+      "sec-fetch-site": "same-origin",
+      "x-client-transaction-id":
+        "ucvQBsSLfFDLJeXKKILzikrqMgBcgogAmY4ZsIGLpMRte2aj1df/E4wQH8tkGMGdcuNB/brspL2sdD0PaO8U2J+uiLN3ug",
+      "x-client-uuid": "ec88267e-bfd6-4f4f-9175-20d8ffb5a066",
+      "x-csrf-token":
+        "6ca947b4fd335753a4c9f8132bc508612d0981da07ce20f953fe7b7acd79de6d70244b1ee2826f238772dfb26aad21038d6279c6ca20540585fad5398a260e6897518a4547331b8c3257c6bdac6b1147",
+      "x-twitter-active-user": "yes",
+      "x-twitter-auth-type": "OAuth2Session",
+      "x-twitter-client-language": "en",
+      cookie:
+        'lang=en; kdt=QqLrDEE3Z7ttNOQU2cnmA5GhTZk8WTfDrl8WJlap; _tracking_consent=%7B%22con%22%3A%7B%22CMP%22%3A%7B%22a%22%3A%22%22%2C%22m%22%3A%22%22%2C%22p%22%3A%22%22%2C%22s%22%3A%22%22%7D%7D%2C%22v%22%3A%222.1%22%2C%22region%22%3A%22USTX%22%2C%22reg%22%3A%22%22%2C%22purposes%22%3A%7B%22a%22%3Atrue%2C%22p%22%3Atrue%2C%22m%22%3Atrue%2C%22t%22%3Atrue%7D%2C%22display_banner%22%3Afalse%2C%22sale_of_data_region%22%3Afalse%2C%22consent_id%22%3A%22E708A820-2b28-4800-9f36-baa464cb2bf9%22%7D; _shopify_y=1780fada-80e2-4c75-97c1-38901aba63c9; intercom-device-id-jgtierkz=4630ae01-83f9-45cf-bf8f-c387ec3c56de; ads_prefs="HBIRAAA="; auth_multi="1114611046407446529:1f9cb587f6f349c09c1ff0e5b7387dda9905a9e0"; auth_token=0a2b2a25d29ea0ad9d224f5dd7a4dd88d45c4370; guest_id=v1%3A173601204911849958; twid=u%3D3181780159; ct0=6ca947b4fd335753a4c9f8132bc508612d0981da07ce20f953fe7b7acd79de6d70244b1ee2826f238772dfb26aad21038d6279c6ca20540585fad5398a260e6897518a4547331b8c3257c6bdac6b1147; d_prefs=MjoxLGNvbnNlbnRfdmVyc2lvbjoyLHRleHRfdmVyc2lvbjoxMDAw; des_opt_in=Y; ph_phc_TXdpocbGVeZVm5VJmAsHTMrCofBQu3e0kN8HGMNGTVW_posthog=%7B%22distinct_id%22%3A%2201949afc-ffc2-7f22-bdc8-6ff383252030%22%2C%22%24sesid%22%3A%5B1737769003660%2C%2201949afc-ffc1-76fe-9846-04fc5972c99e%22%2C1737767059393%5D%7D; intercom-session-jgtierkz=NWhuSTRBNnhpTUE1Sy9MVTlTNHZMZ1loYmhtUWRaS3VRMitSRE5KUjYyZUdjTzBmRzh1WEIzWDN6aWxNQ1d3U0ZNQ0dGNEVQakVmZUU5QU9seGVocWFWRWtYd0Fmai9HbmpzcElZV3g2SDA9LS1JeHNOZHhNNUdmajZ4SVdmd2hGek13PT0=--cd264bf0cad5ac4fa3c43678702baabc878fabf6; guest_id_marketing=v1%3A173601204911849958; guest_id_ads=v1%3A173601204911849958; personalization_id="v1_Kry03FDC31tIAvF4Oi+wqg=="',
+      Referer: "https://x.com/compose/post",
+      "Referrer-Policy": "strict-origin-when-cross-origin",
+    },
+    body: `{"variables":{"tweet_text":"Here\'s your WHOP! https://whop.com/${productRoute}/","reply":{"in_reply_to_tweet_id":"${tweetId}","exclude_reply_user_ids":[]},"dark_request":false,"media":{"media_entities":[],"possibly_sensitive":false},"semantic_annotation_ids":[],"disallowed_reply_options":null},"features":{"premium_content_api_read_enabled":false,"communities_web_enable_tweet_community_results_fetch":true,"c9s_tweet_anatomy_moderator_badge_enabled":true,"responsive_web_grok_analyze_button_fetch_trends_enabled":false,"responsive_web_grok_analyze_post_followups_enabled":true,"responsive_web_jetfuel_frame":false,"responsive_web_grok_share_attachment_enabled":true,"responsive_web_edit_tweet_api_enabled":true,"graphql_is_translatable_rweb_tweet_is_translatable_enabled":true,"view_counts_everywhere_api_enabled":true,"longform_notetweets_consumption_enabled":true,"responsive_web_twitter_article_tweet_consumption_enabled":true,"tweet_awards_web_tipping_enabled":false,"creator_subscriptions_quote_tweet_preview_enabled":false,"longform_notetweets_rich_text_read_enabled":true,"longform_notetweets_inline_media_enabled":true,"profile_label_improvements_pcf_label_in_post_enabled":true,"rweb_tipjar_consumption_enabled":true,"responsive_web_graphql_exclude_directive_enabled":true,"verified_phone_label_enabled":false,"articles_preview_enabled":true,"rweb_video_timestamps_enabled":true,"responsive_web_graphql_skip_user_profile_image_extensions_enabled":false,"freedom_of_speech_not_reach_fetch_enabled":true,"standardized_nudges_misinfo":true,"tweet_with_visibility_results_prefer_gql_limited_actions_policy_enabled":true,"responsive_web_grok_image_annotation_enabled":true,"responsive_web_graphql_timeline_navigation_enabled":true,"responsive_web_enhance_cards_enabled":false},"queryId":"_aUkOlYcrHMY3LR-lUVuSg"}`,
+    method: "POST",
+  });
+}
+let processedTweetIds = ["1882969151230386272", "1882970220945703310"];
 
 async function fetchNotifications() {
   const response = await fetch(
@@ -466,7 +497,8 @@ async function fetchNotifications() {
             console.log(`Found token name: $${tokenName}`);
             processedTweetIds.push(tweetId); // Add tweet ID to processed list
             // You can now proceed to create a Whop store for this token
-            await createEnhancedWhop(tokenName);
+            const route = await createEnhancedWhop(tokenName);
+            await replyToTweet(tweetId, route);
           }
         }
       }
