@@ -1,19 +1,11 @@
 require("dotenv").config();
 
-const { TwitterApi } = require("twitter-api-v2");
 const OpenAI = require("openai");
 const axios = require("axios");
-const { Rettiwt } = require("rettiwt-api");
 
 // Initialize OpenAI
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
-});
-
-// Initialize Rettiwt with user authentication
-const rettiwt = new Rettiwt({
-  apiKey: process.env.RETTIWT_API_KEY,
-  logger: true,
 });
 
 async function generateStoreAssets(tokenName) {
@@ -208,7 +200,7 @@ async function createChatApp(productRoute, companyId, accessPassId) {
         Referer: "https://whop.com/tokenization-30/",
         "Referrer-Policy": "strict-origin-when-cross-origin",
       },
-      body: `[{"companyId":"${companyId}","accessPassId":"${accessPassId}","productRoute":"${productRoute}","appId":"${appId}","name":"Chat"}]`,
+      body: `[{"companyId":"${companyId}","accessPassId":"${accessPassId}","productRoute":"${productRoute}","appId":"app_xml5hbizmZPgUT","name":"Chat"}]`,
       method: "POST",
     });
 
@@ -332,7 +324,7 @@ async function updateWhopWithImage(
   axios
     .request(config)
     .then((response) => {
-      console.log(JSON.stringify(response.data));
+      console.log("image upload status", response.status);
     })
     .catch((error) => {
       console.log(error);
@@ -417,8 +409,7 @@ async function fetchNotifications() {
       headers: {
         accept: "*/*",
         "accept-language": "en-US,en;q=0.9",
-        authorization:
-          "Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA",
+        authorization: process.env.TWITTER_KEY,
         "sec-ch-ua": '"Not A(Brand";v="8", "Chromium";v="132"',
         "sec-ch-ua-mobile": "?0",
         "sec-ch-ua-platform": '"macOS"',
